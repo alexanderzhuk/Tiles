@@ -1,0 +1,193 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Tiles sample</title>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+    <style>
+        html {
+            font-size: 62.5%;
+        }
+
+        #flexContainer {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            align-content: stretch;
+            align-items: stretch;
+        }
+
+        .flex-item {
+            display: flexbox;
+            flex-wrap: nowrap;
+            flex-grow: 1;
+            flex-shrink: 1;
+            flex-basis: 500px;
+            flex-direction: column;
+            min-width: 500px;
+            margin: 4px;
+            padding: 0;
+            border: 1px solid red;
+        }
+
+            .flex-item.flex-item-empty {
+                border: 0;
+                padding: 0;
+            }
+
+            .flex-item button {
+                font-size: 1.4em;
+            }
+
+        #rangeSlider {
+        }
+
+        .item-header {
+            background-color: aliceblue;
+            margin: 0;
+            padding: 4px;
+            font-size: 1.8em;
+        }
+
+        .item-content {
+            font-size: 1.4em;
+        }
+    </style>
+   <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+   <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+    <script>
+
+        var defaultOrder = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        var newOrder = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drag(ev) {
+            var flexItem = $(ev.target).parent('.flex-item');
+            var dragSourceOrder = $(flexItem).css("order");
+            ev.dataTransfer = ev.originalEvent.dataTransfer;
+            ev.dataTransfer.setData('Text', dragSourceOrder);
+            $(flexItem).attr("id", "");
+            $(flexItem).attr("id", "dragItem");
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            ev.dataTransfer = ev.originalEvent.dataTransfer;
+            var dragginItemOrder = ev.dataTransfer.getData('Text');
+            var currentItemOrder = $(ev.target).closest('.flex-item').css('order');
+            $(ev.target).closest('.flex-item').css('order', dragginItemOrder);
+            $("#dragItem").css('order', currentItemOrder);
+            newOrder[currentItemOrder] = dragginItemOrder;
+            newOrder[dragginItemOrder] = currentItemOrder;
+            window.localStorage.setArray("savedOrder", newOrder);
+            //if (dragginItemOrder < currentItemOrder) {
+            //    var nextOrder = currentItemOrder++;
+            //    $(ev.target).closest('.flex-item').css('order', nextOrder);
+            //    $("#dragItem").css('order', currentItemOrder);
+            //    newOrder[currentItemOrder] = dragginItemOrder;
+            //    window.localStorage.setArray("savedOrder", newOrder);
+            //    var itemsList = $('.flex-item');
+            //}
+
+            //else if (dragginItemOrder > currentItemOrder) {
+            //    var previousOrder = currentItemOrder--;
+            //    $(ev.target).closest('.flex-item').css('order', previousOrder);
+            //    $("#dragItem").css('order', currentItemOrder);
+            //}
+        }
+
+        Storage.prototype.setArray = function (key, obj) {
+            return this.setItem(key, JSON.stringify(obj))
+        }
+        Storage.prototype.getArray = function (key) {
+            return JSON.parse(this.getItem(key))
+        }
+
+        $(document).ready(function () {
+            var initialOrder = window.localStorage.getArray("savedOrder");
+            var itemsList = $('.flex-item');
+            for (var i = 0; i < initialOrder.length; i++) {
+                $(itemsList[i]).css("order", initialOrder[i]);
+            }
+            $('.item-header').attr("draggable", "true");
+            $(".flex-item").on("dragstart", drag);
+            $(".flex-item").on("drop", drop);
+            $(".flex-item").on("dragover", allowDrop);
+
+        });
+
+        function fontChange(val) {
+            var newValue = $('#rangeSlider').val();
+            $('#temp').html(newValue);
+            $('body').css('font-size', newValue + 'rem')
+        }
+
+        function resetClick() {
+            var itemsList = $('.flex-item');
+            for (var i = 0; i < defaultOrder.length; i++) {
+                $(itemsList[i]).css("order", defaultOrder[i]);
+            }
+            newOrder = defaultOrder;
+            window.localStorage.setArray("savedOrder", newOrder);
+        }
+
+    </script>
+</head>
+
+<body>
+    <div>
+        <input id="rangeSlider" type="range" min="0.9" max="1.9" step="0.01" onchange="fontChange(this.value)" />
+        <div id="temp"></div>
+        <input type="button" value="Reset layout" onclick="resetClick()" />
+        <div id="flexContainer">
+            <div class="flex-item">
+                <div class="item-header">Header1</div>
+                <div class="item-content">!!!!Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam et diam odio, et dictum dui. Suspendisse mauris risus, tristique eget faucibus nec, porta eget nulla. Nullam nec nisi id arcu consectetur pulvinar. Vestibulum ultrices, leo ac semper cursus, lacus mauris fringilla diam, malesuada porta dui lectus quis risus. Donec accumsan nulla in lorem cursus pellentesque. Nullam in facilisis lectus. Ut vitae diam lorem, sed consequat metus. Donec pharetra odio a nulla commodo placerat at vel nisi. Phasellus tempor sapien et quam sodales facilisis. In nec dui massa, eu fermentum ipsum. Fusce posuere imperdiet faucibus. Vivamus in auctor metus. Duis lacus libero, scelerisque ac lacinia id, rutrum at lorem. Duis vel dolor nunc, quis congue orci. Aliquam suscipit ipsum in sem tempor vel vulputate enim dignissim. Praesent et risus dolor, mattis egestas turpis.</div>
+            </div>
+            <div class='flex-item'>
+                <div class="item-header">Header2</div>
+                <div class="item-content">Etiam dictum, odio nec dignissim dictum, risus justo consectetur diam, dignissim cursus est enim id velit. Sed feugiat suscipit diam quis mollis. Nunc orci urna, malesuada vel hendrerit id, condimentum sit amet velit. Nullam placerat fermentum mauris vitae ornare. Nullam odio tellus, consequat dictum tempus a, varius vitae lacus. Suspendisse viverra nibh at magna convallis bibendum. Donec id lacus ac sapien tristique hendrerit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus posuere justo et metus consequat vitae fringilla risus viverra. Vestibulum vitae mi orci. Vestibulum interdum faucibus dui, quis interdum justo fringilla sed. Duis nec pellentesque quam. Curabitur quis tincidunt urna. Ut non quam non est convallis molestie vel scelerisque sapien.</div>
+                <button>2222</button>
+            </div>
+            <div class='flex-item'>
+                <div class="item-header">Header3</div>
+                <div class="item-content">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam et diam odio, et dictum dui. Suspendisse mauris risus, tristique eget faucibus nec, porta eget nulla. Nullam nec nisi id arcu consectetur pulvinar. Vestibulum ultrices, leo ac semper cursus, lacus mauris fringilla diam, malesuada porta dui lectus quis risus. Donec accumsan nulla in lorem cursus pellentesque. Nullam in facilisis lectus. Ut vitae diam lorem, sed consequat metus. Donec pharetra odio a nulla commodo placerat at vel nisi. Phasellus tempor sapien et quam sodales facilisis. In nec dui massa, eu fermentum ipsum. Fusce posuere imperdiet faucibus. Vivamus in auctor metus. Duis lacus libero, scelerisque ac lacinia id, rutrum at lorem. Duis vel dolor nunc, quis congue orci. Aliquam suscipit ipsum in sem tempor vel vulputate enim dignissim. Praesent et risus dolor, mattis egestas turpis.</div>
+                <button>3333</button>
+            </div>
+            <div class='flex-item'>
+                <div class="item-header">Header4</div>
+                <div class="item-content">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam et diam odio, et dictum dui. Suspendisse mauris risus, tristique eget faucibus nec, porta eget nulla. Nullam nec nisi id arcu consectetur pulvinar. Vestibulum ultrices, leo ac semper cursus, lacus mauris fringilla diam, malesuada porta dui lectus quis risus. Donec accumsan nulla in lorem cursus pellentesque. Nullam in facilisis lectus. Ut vitae diam lorem, sed consequat metus. Donec pharetra odio a nulla commodo placerat at vel nisi. Phasellus tempor sapien et quam sodales facilisis. In nec dui massa, eu fermentum ipsum. Fusce posuere imperdiet faucibus. Vivamus in auctor metus. Duis lacus libero, scelerisque ac lacinia id, rutrum at lorem. Duis vel dolor nunc, quis congue orci. Aliquam suscipit ipsum in sem tempor vel vulputate enim dignissim. Praesent et risus dolor, mattis egestas turpis.</div>
+                <button>4444</button>
+            </div>
+            <div class='flex-item'>
+                <div class="item-header">Header5</div>
+                <div class="item-content">enim dignissim. Praesent et risus dolor, mattis egestas turpis.</div>
+                <button>5555</button>
+            </div>
+            <div class='flex-item'>
+                <div class="item-header">Header6</div>
+                <div class="item-content">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam et diam odio, et dictum dui. Suspendisse mauris risus, tristique eget faucibus nec, porta eget nulla. Nullam nec nisi id arcu consectetur pulvinar. Vestibulum ultrices, leo ac semper cursus, lacus mauris fringilla diam, malesuada porta dui lectus quis risus. Donec accumsan nulla in lorem cursus pellentesque. Nullam in facilisis lectus. Ut vitae diam lorem, sed consequat metus. Donec pharetra odio a nulla commodo placerat at vel nisi. Phasellus tempor sapien et quam sodales facilisis. In nec dui massa, eu fermentum ipsum. Fusce posuere imperdiet faucibus. Vivamus in auctor metus. Duis lacus libero, scelerisque ac lacinia id, rutrum at lorem. Duis vel dolor nunc, quis congue orci. Aliquam suscipit ipsum in sem tempor vel vulputate enim dignissim. Praesent et risus dolor, mattis egestas turpis.</div>
+                <button>6666</button>
+            </div>
+            <div class='flex-item'>
+                <div class="item-header">Header7</div>
+                <div class="item-content">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam et diam odio, et dictum dui. Suspendisse mauris risus, tristique eget faucibus nec, porta eget nulla. Nullam nec nisi id arcu consectetur pulvinar. Vestibulum ultrices, leo ac semper cursus, lacus mauris fringilla diam, malesuada porta dui lectus quis risus. Donec accumsan nulla in lorem cursus pellentesque. Nullam in facilisis lectus. Ut vitae diam lorem, sed consequat metus. Donec pharetra odio a nulla commodo placerat at vel nisi. Phasellus tempor sapien et quam sodales facilisis. In nec dui massa, eu fermentum ipsum. Fusce posuere imperdiet faucibus. Vivamus in auctor metus. Duis lacus libero, scelerisque ac lacinia id, rutrum at lorem. Duis vel dolor nunc, quis congue orci. Aliquam suscipit ipsum in sem tempor vel vulputate enim dignissim. Praesent et risus dolor, mattis egestas turpis.</div>
+                <button>7777</button>
+            </div>
+            <div class='flex-item'>
+                <div class="item-header">Header8</div>
+                <div class="item-content">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam et diam odio, et dictum dui. Suspendisse mauris risus, tristique eget faucibus nec, porta eget nulla. Nullam nec nisi id arcu consectetur pulvinar. Vestibulum ultrices, leo ac semper cursus, lacus mauris fringilla diam, malesuada porta dui lectus quis risus. Donec accumsan nulla in lorem cursus pellentesque. Nullam in facilisis lectus. Ut vitae diam lorem, sed consequat metus. Donec pharetra odio a nulla commodo placerat at vel nisi. Phasellus tempor sapien et quam sodales facilisis. In nec dui massa, eu fermentum ipsum. Fusce posuere imperdiet faucibus. Vivamus in auctor metus. Duis lacus libero, scelerisque ac lacinia id, rutrum at lorem. Duis vel dolor nunc, quis congue orci. Aliquam suscipit ipsum in sem tempor vel vulputate enim dignissim. Praesent et risus dolor, mattis egestas turpis.</div>
+                <button>88888</button>
+            </div>
+            <div class='flex-item flex-item-empty'>
+            </div>
+            <div class='flex-item flex-item-empty'>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
